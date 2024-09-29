@@ -2,10 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { getAssets, getPortfolio } from '../../api/api';
 import { Assets, Portfolio } from '../../api/api.types';
 import { PieChart } from '../../components/organisms';
+import { AssetView } from './types';
+import { GenericObject } from '../../utils/common.type';
 
 export const Performance = () => {
   const [portfolio, setPortfolio] = useState<Portfolio[]>([]);
   const [assets, setAssets] = useState<Assets[]>([]);
+  const [view, setView] = useState<AssetView>(AssetView.ASSETCLASS);
+
   useEffect(() => {
     getPortfolio().then(folio => setPortfolio(folio));
     getAssets().then(asset => setAssets(asset));
@@ -13,7 +17,8 @@ export const Performance = () => {
 
   const portfolioPos = useMemo(() => {
     let assetsMap = {};
-    let latestPortfolioMap = {};
+    let latestPortfolioMapByAsset = {};
+    let portfolioMapByAssetClass = {};
     if (assets.length > 0) {
       assets.forEach(mapper => {
         assetsMap = {
@@ -23,40 +28,58 @@ export const Performance = () => {
       });
 
       portfolio[portfolio.length - 1].positions.forEach(pos => {
-        latestPortfolioMap = {
-          ...latestPortfolioMap,
+        latestPortfolioMapByAsset = {
+          ...latestPortfolioMapByAsset,
           [assetsMap[pos.asset].type]:
-            (latestPortfolioMap[assetsMap[pos.asset].type] || 0) +
+            (latestPortfolioMapByAsset[assetsMap[pos.asset].type] || 0) +
             pos.price * pos.quantity
+        };
+      });
+
+      portfolio[portfolio.length - 1].positions.forEach(pos => {
+        portfolioMapByAssetClass = {
+          ...portfolioMapByAssetClass,
+          [pos.asset]: pos.price * pos.quantity
         };
       });
     }
 
     return {
-      assetsMap,
-      latestPortfolioMap
+      latestPortfolioMapByAsset,
+      portfolioMapByAssetClass
     };
   }, [assets, portfolio]);
 
-  const pieChartData = {
-    labels: Object.keys(portfolioPos.latestPortfolioMap),
-    datasets: [
-      {
-        label: 'PortolioPosition',
-        data: Object.values(portfolioPos.latestPortfolioMap),
-        backgroundColor: [
-          'rgb(255, 99, 132)',
-          'rgb(54, 162, 235)',
-          'rgb(255, 205, 86)'
-        ],
-        borderColor: 'black',
-        borderWidth: 2
-      }
-    ]
+  const pieChartDataBuilder = (assetData: GenericObject<number>) => {
+    return {
+      labels: Object.keys(assetData),
+      datasets: [
+        {
+          label: 'PortolioPosition',
+          data: Object.values(assetData),
+          backgroundColor: [
+            '#8BC1F7',
+            '#BDE2B9',
+            '#A2D9D9',
+            '#B2B0EA',
+            '#F9E0A2',
+            '#F4B678'
+          ],
+          borderColor: 'black',
+          borderWidth: 2
+        }
+      ]
+    };
   };
+
+  const viewBasedPieChart = useMemo(() => {
+    if (view === AssetView.ASSET) return portfolioPos.latestPortfolioMapByAsset;
+    return portfolioPos.portfolioMapByAssetClass;
+  }, [view, portfolioPos]);
+
   return (
     <div className="">
-      <PieChart chartData={pieChartData} />
+      <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
     </div>
   );
 };
