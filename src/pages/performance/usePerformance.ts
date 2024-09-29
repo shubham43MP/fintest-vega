@@ -119,6 +119,7 @@ export const usePerformance = () => {
     view,
     viewBasedPieChart,
     lineChartDataBuilder,
+    perfTimeline,
     changeViewHandler,
     pieChartDataBuilder,
     setPerfTimeline

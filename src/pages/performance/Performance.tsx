@@ -9,6 +9,7 @@ export const Performance = () => {
     view,
     viewBasedPieChart,
     lineChartDataBuilder,
+    perfTimeline,
     changeViewHandler,
     pieChartDataBuilder,
     setPerfTimeline
@@ -34,7 +35,10 @@ export const Performance = () => {
               onClick={() =>
                 setPerfTimeline(PerfTimeline[item as keyof typeof PerfTimeline])
               }
-              className="p-4 bg-gray-100 rounded-2xl cursor-pointer"
+              className={`p-4 bg-gray-100 rounded-2xl cursor-pointer ${
+                PerfTimeline[item as keyof typeof PerfTimeline] ===
+                  perfTimeline && 'bg-blue-100'
+              }`}
             >
               {item}
             </button>
