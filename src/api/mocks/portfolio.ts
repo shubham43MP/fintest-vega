@@ -1,4 +1,6 @@
-export const portfolio = [
+import { Portfolio } from "../api.types";
+
+export const portfolio: Portfolio[] = [
     {
       "id": "db58e3bc-f8de-46b4-a31f-e45e9138d5b9",
       "asOf": "2024-09-01T09:00:00Z",
