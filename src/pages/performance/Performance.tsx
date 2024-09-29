@@ -77,8 +77,19 @@ export const Performance = () => {
     return portfolioPos.portfolioMapByAssetClass;
   }, [view, portfolioPos]);
 
+  const changeViewHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setView(e?.target.value as AssetView);
+  };
+
   return (
-    <div className="">
+    <div className="flex justify-center gap-16">
+      <div className="h-96 w-96">
+        <select value={view} onChange={changeViewHandler}>
+          <option value={AssetView.ASSETCLASS}>Asset class view</option>
+          <option value={AssetView.ASSET}>Asset type view</option>
+        </select>
+        <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
+      </div>
       <div className="h-96 w-96">
         <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
       </div>
