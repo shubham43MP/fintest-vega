@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAssets, getPortfolio } from '../../api/api';
 import { Assets, Portfolio } from '../../api/api.types';
-import { PieChart } from '../../components/organisms';
+import { PieChart } from '../../components/organisms/PieChart';
 import { AssetView } from './types';
 import { GenericObject } from '../../utils/common.type';
+import { LineChart } from '../../components/organisms/LineChart';
 
 export const Performance = () => {
   const [portfolio, setPortfolio] = useState<Portfolio[]>([]);
@@ -72,6 +73,41 @@ export const Performance = () => {
     };
   };
 
+  const lineChartDataBuilder = useMemo(() => {
+    let lineChartData = {};
+    portfolio.forEach(item => {
+      const asOfDate = new Date(item.asOf);
+      const totalValue = item.positions.reduce((sum, position) => {
+        return sum + position.quantity * position.price;
+      }, 0);
+      lineChartData = {
+        ...lineChartData,
+        [`${asOfDate.getDate()}-${
+          asOfDate.getMonth() + 1
+        }-${asOfDate.getFullYear()}`]: totalValue
+      };
+    });
+    return {
+      labels: Object.keys(lineChartData),
+      datasets: [
+        {
+          label: 'Balance Performance',
+          data: Object.values(lineChartData),
+          backgroundColor: [
+            '#8BC1F7',
+            '#BDE2B9',
+            '#A2D9D9',
+            '#B2B0EA',
+            '#F9E0A2',
+            '#F4B678'
+          ],
+          borderColor: 'black',
+          borderWidth: 2
+        }
+      ]
+    };
+  }, [portfolio]);
+
   const viewBasedPieChart = useMemo(() => {
     if (view === AssetView.ASSET) return portfolioPos.latestPortfolioMapByAsset;
     return portfolioPos.portfolioMapByAssetClass;
@@ -82,16 +118,20 @@ export const Performance = () => {
   };
 
   return (
-    <div className="flex justify-center gap-16">
-      <div className="h-96 w-96">
-        <select value={view} onChange={changeViewHandler}>
+    <div className="flex justify-center gap-12">
+      <div className="h-96 w-96 flex flex-col gap-4">
+        <select
+          className="self-center"
+          value={view}
+          onChange={changeViewHandler}
+        >
           <option value={AssetView.ASSETCLASS}>Asset class view</option>
           <option value={AssetView.ASSET}>Asset type view</option>
         </select>
         <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
       </div>
-      <div className="h-96 w-96">
-        <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
+      <div className="h-full w-full">
+        <LineChart chartData={lineChartDataBuilder} />
       </div>
     </div>
   );
