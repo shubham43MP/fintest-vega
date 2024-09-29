@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { getAssets, getPortfolio } from '../../api/api';
 import { Assets, Portfolio } from '../../api/api.types';
 import { PieChart } from '../../components/organisms/PieChart';
-import { AssetView } from './types';
 import { GenericObject } from '../../utils/common.type';
 import { LineChart } from '../../components/organisms/LineChart';
+import { AssetView } from './types';
+import { PerfTimeline } from './common';
 
 export const Performance = () => {
   const [portfolio, setPortfolio] = useState<Portfolio[]>([]);
   const [assets, setAssets] = useState<Assets[]>([]);
   const [view, setView] = useState<AssetView>(AssetView.ASSETCLASS);
+  const [perfTimeline, setPerfTimeline] = useState<number>(0);
 
   useEffect(() => {
     getPortfolio().then(folio => setPortfolio(folio));
@@ -75,7 +77,7 @@ export const Performance = () => {
 
   const lineChartDataBuilder = useMemo(() => {
     let lineChartData = {};
-    portfolio.forEach(item => {
+    portfolio.slice(-perfTimeline).forEach(item => {
       const asOfDate = new Date(item.asOf);
       const totalValue = item.positions.reduce((sum, position) => {
         return sum + position.quantity * position.price;
@@ -106,7 +108,7 @@ export const Performance = () => {
         }
       ]
     };
-  }, [portfolio]);
+  }, [portfolio, perfTimeline]);
 
   const viewBasedPieChart = useMemo(() => {
     if (view === AssetView.ASSET) return portfolioPos.latestPortfolioMapByAsset;
@@ -131,6 +133,18 @@ export const Performance = () => {
         <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
       </div>
       <div className="h-full w-full">
+        <div className="flex gap-2 justify-center">
+          {Object.keys(PerfTimeline).map(item => (
+            <button
+              onClick={() =>
+                setPerfTimeline(PerfTimeline[item as keyof typeof PerfTimeline])
+              }
+              className="p-4 bg-gray-100 rounded-2xl cursor-pointer"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
         <LineChart chartData={lineChartDataBuilder} />
       </div>
     </div>
