@@ -79,7 +79,9 @@ export const Performance = () => {
 
   return (
     <div className="">
-      <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
+      <div className="h-96 w-96">
+        <PieChart chartData={pieChartDataBuilder(viewBasedPieChart)} />
+      </div>
     </div>
   );
 };
