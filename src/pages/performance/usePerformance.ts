@@ -92,14 +92,7 @@ export const usePerformance = () => {
         {
           label: 'Balance Performance',
           data: Object.values(lineChartData),
-          backgroundColor: [
-            '#8BC1F7',
-            '#BDE2B9',
-            '#A2D9D9',
-            '#B2B0EA',
-            '#F9E0A2',
-            '#F4B678'
-          ],
+          backgroundColor: ['#F9E0A2', '#F4B678'],
           borderColor: 'black',
           borderWidth: 2
         }
